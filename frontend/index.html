@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Personal dkkkkkli</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main class="container">
+  <h1>Personal Kundli</h1>
+  <section class="card" id="savedRecordsCard">
+    <h2>Saved Kundlis</h2>
+    <div class="grid">
+      <label class="full">Admin key
+        <input id="adminKey" type="password" autocomplete="current-password" placeholder="Enter BRAHMVAKYA_ADMIN_KEY">
+      </label>
+    </div>
+    <button id="loginRecords" class="secondary" type="button">Unlock saved records</button>
+    <span id="adminStatus" role="status"></span>
+    <p class="sub">Saved records are stored in the configured database. Search and open a record to restore its chart.</p>
+    <div class="grid">
+      <label class="full">Search saved records
+        <input id="recordSearch" type="search" placeholder="Name, Instagram username, DOB, place or record ID">
+      </label>
+    </div>
+    <button id="refreshRecords" class="secondary" type="button">Refresh history</button>
+    <div id="recordsStatus" role="status"></div>
+    <div class="tableWrap">
+      <table id="recordsTable">
+        <thead><tr><th>Record ID</th><th>Name / Instagram</th><th>DOB</th><th>Birth place</th><th>Query</th><th>Saved</th><th>Open</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+  <p class="sub">Phase 1 — Kundli calculation • Phase 2 — deterministic marriage algorithm</p>
+
+  <section class="card">
+    <div class="grid">
+      <label>Date of Birth<input id="dob" type="date"></label>
+      <label>Time of Birth<input id="time" type="time" step="1"></label>
+      <label class="full">Place of Birth
+        <input id="place" type="text" autocomplete="off" placeholder="Start typing e.g. Del">
+        <div id="suggestions" class="suggestions"></div>
+        <small id="selectedPlace"></small>
+      </label>
+    </div>
+    <button id="calculate" disabled>Calculate Kundli</button>
+    <div id="status"></div>
+  </section>
+
+  <section id="result" class="hidden">
+    <div class="card">
+      <h2>Birth Summary</h2>
+      <div id="summary"></div>
+    </div>
+
+    <div class="card">
+      <h2>Ascendant</h2>
+      <div id="ascendant"></div>
+    </div>
+
+    <div class="card">
+      <h2>Planetary Positions</h2>
+      <div class="tableWrap">
+        <table id="planetTable">
+          <thead><tr><th>Planet</th><th>Sign</th><th>Degree</th><th>House</th><th>Nakshatra</th><th>Lord</th><th>Pada</th><th>Retrograde</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>ग्रह निर्देशन — Grah Nirdeshan</h2>
+      <p class="sub">Exact D-1 signified-bhavas table using Parashari house placement/lordship and the Nakshatra Lord (न) from the planetary coordinate table. No Bhava Chalit or cusp sub-lords.</p>
+      <button id="calcGrahNirdeshan" class="secondary">Generate Grah Nirdeshan</button>
+      <div class="tableWrap">
+        <table id="grahNirdeshanTable">
+          <thead><tr><th>ग्रह (Planet)</th><th>निर्देशित भाव (Signified Bhavas)</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <pre id="grahNirdeshanJson"></pre>
+    </div>
+
+    <div class="card">
+      <h2>Phase 1 — Vimshottari Dasha</h2>
+      <p class="sub">Canonical deterministic Vimshottari calculation from the Moon's exact sidereal longitude. All date conversion uses a 360-day Savana year.</p>
+      <div id="dashaSummary"></div>
+
+      <h3>Mahadasha</h3>
+      <div class="tableWrap">
+        <table id="mdTable">
+          <thead><tr><th>Planet</th><th>Start</th><th>End</th><th>Duration</th><th>Days</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <h3>Antardasha</h3>
+      <div class="tableWrap">
+        <table id="adTable">
+          <thead><tr><th>Mahadasha</th><th>Antardasha</th><th>Start</th><th>End</th><th>Duration</th><th>Days</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <h3>Pratyantardasha</h3>
+      <div class="tableWrap">
+        <table id="pdTable">
+          <thead><tr><th>Mahadasha</th><th>Antardasha</th><th>Pratyantardasha</th><th>Start</th><th>End</th><th>Duration</th><th>Days</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <h3>Formula & Verification</h3>
+      <pre id="dashaVerification"></pre>
+    </div>
+
+    <div class="card">
+      <h2>Phase 2 — Deterministic Astrology Analysis</h2>
+      <p class="sub">Strict deterministic Bhava-Navamsha + KP algorithm. No generic Jyotish rules or AI interpretation are used.</p>
+      <button id="calcSig" class="secondary">Generate Significators</button>
+      <div class="tableWrap">
+        <table id="sigTable">
+          <thead><tr><th>Planet</th><th>Level 1<br>Star Lord Placement</th><th>Level 2<br>Star Lord Ownership</th><th>Level 3<br>Planet Placement</th><th>Level 4<br>Planet Ownership</th><th>Level 5<br>Aspects</th><th>Star Lord</th><th>Final Houses</th><th>2/7/11</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="marriageSummary" class="marriageSummary"></div>
+      <h3>Significator / Marriage JSON</h3>
+      <pre id="sigJson"></pre>
+    </div>
+
+    <div class="card">
+      <h2>House Purchasing Astrology</h2>
+      <p class="sub">Strict deterministic rules: Navamsha 4th Lord, Saturn/Mars connection, Rahu property-quality check, and 2/4/11/12 Dasha timing.</p>
+      <button id="calcProperty" class="secondary">Analyze House Purchase</button>
+      <div id="propertySummary" class="marriageSummary"></div>
+      <h3>Property Signification Table</h3>
+      <div class="tableWrap">
+        <table id="propertyTable">
+          <thead><tr><th>Planet</th><th>L1 Star Placement</th><th>L2 Star Ownership</th><th>L3 Placement</th><th>L4 Ownership</th><th>L5 Drishti</th><th>2/4/11/12</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <h3>Property Analysis JSON</h3>
+      <pre id="propertyJson"></pre>
+    </div>
+
+    <div class="card">
+      <h2>Childbirth Astrology</h2>
+      <p class="sub">Strict deterministic KP & Vedic rules: Navamsha 5th Lord promise, D1 House-8 delivery risk, Rahu check, and 2/5/11 Vimshottari timing.</p>
+      <button id="calcChildbirth" class="secondary">Analyze Childbirth</button>
+      <div id="childbirthSummary" class="marriageSummary"></div>
+      <h3>Childbirth Analysis JSON</h3>
+      <pre id="childbirthJson"></pre>
+    </div>
+
+    <div class="card">
+      <h2>Phase 5 — Most Upcoming Event Timing</h2>
+      <p class="sub">Forward-only scan from the exact current runtime date/time (T0). Past Dasha intervals are excluded. A match requires the Navamsha key lord promise and complete Target House coverage by MD + AD + PD.</p>
+      <button id="calcUpcomingEvents" class="secondary" type="button">Find Upcoming Dates</button>
+      <div class="tableWrap">
+        <table id="upcomingEventsTable">
+          <thead><tr><th>Event</th><th>Target Houses</th><th>Promise</th><th>Navamsha Key Lord</th><th>First Future Dasha Match</th><th>Valid Period</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="upcomingEventsDetails"></div>
+      <pre id="upcomingEventsJson"></pre>
+    </div>
+
+    <div class="card">
+      <h2>Kundli JSON</h2>
+      <button id="copyJson" class="secondary">Copy JSON</button>
+      <pre id="json"></pre>
+    </div>
+  </section>
+</main>
+<script src="js/app.js"></script>
+</body>
+</html>

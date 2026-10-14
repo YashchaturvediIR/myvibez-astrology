@@ -257,27 +257,71 @@ function renderDasha(dasha) {
     <p><b>Date conversion:</b> ${dasha.formulas.date_conversion}</p>`;
 
   const mdBody = document.querySelector("#mdTable tbody");
+  const adBody = document.querySelector("#adTable tbody");
+  const pdBody = document.querySelector("#pdTable tbody");
+  const adExplorer = document.getElementById("adExplorer");
+  const pdExplorer = document.getElementById("pdExplorer");
+  const selectedMDTitle = document.getElementById("selectedMDTitle");
+  const selectedADTitle = document.getElementById("selectedADTitle");
+  const samePlanet = (a, b) => String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
+
   mdBody.innerHTML = "";
+  adBody.innerHTML = "";
+  pdBody.innerHTML = "";
+  adExplorer.classList.add("hidden");
+  pdExplorer.classList.add("hidden");
+
   dasha.mahadasha.forEach(x => {
     const tr = document.createElement("tr");
-    [x.planet, shortDate(x.start), shortDate(x.end), x.duration, x.duration_days].forEach(v => { const td=document.createElement("td"); td.textContent=v; tr.appendChild(td); });
+    tr.className = "dasha-select-row";
+    tr.tabIndex = 0;
+    tr.setAttribute("role", "button");
+    tr.setAttribute("aria-label", `View ${x.planet} Antardasha`);
+    [x.planet, shortDate(x.start), shortDate(x.end), x.duration, x.duration_days].forEach(v => {
+      const td = document.createElement("td"); td.textContent = v; tr.appendChild(td);
+    });
+    const openMD = () => {
+      mdBody.querySelectorAll("tr").forEach(row => row.classList.remove("dasha-selected"));
+      tr.classList.add("dasha-selected");
+      selectedMDTitle.textContent = `${x.planet} Mahadasha · Antardasha`;
+      adBody.innerHTML = "";
+      pdBody.innerHTML = "";
+      pdExplorer.classList.add("hidden");
+      const rows = dasha.antardasha.filter(item => samePlanet(item.mahadasha, x.planet));
+      rows.forEach(ad => {
+        const ar = document.createElement("tr");
+        ar.className = "dasha-select-row";
+        ar.tabIndex = 0;
+        ar.setAttribute("role", "button");
+        ar.setAttribute("aria-label", `View ${ad.antardasha} Pratyantardasha`);
+        [ad.mahadasha, ad.antardasha, shortDate(ad.start), shortDate(ad.end), ad.duration, ad.duration_days].forEach(v => {
+          const td = document.createElement("td"); td.textContent = v; ar.appendChild(td);
+        });
+        const openAD = () => {
+          adBody.querySelectorAll("tr").forEach(row => row.classList.remove("dasha-selected"));
+          ar.classList.add("dasha-selected");
+          selectedADTitle.textContent = `${ad.mahadasha} → ${ad.antardasha} · Pratyantardasha`;
+          pdBody.innerHTML = "";
+          dasha.pratyantardasha
+            .filter(item => samePlanet(item.mahadasha, ad.mahadasha) && samePlanet(item.antardasha, ad.antardasha))
+            .forEach(pd => {
+              const pr = document.createElement("tr");
+              [pd.mahadasha, pd.antardasha, pd.pratyantardasha, shortDate(pd.start), shortDate(pd.end), pd.duration, pd.duration_days].forEach(v => {
+                const td = document.createElement("td"); td.textContent = v; pr.appendChild(td);
+              });
+              pdBody.appendChild(pr);
+            });
+          pdExplorer.classList.remove("hidden");
+        };
+        ar.addEventListener("click", openAD);
+        ar.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openAD(); } });
+        adBody.appendChild(ar);
+      });
+      adExplorer.classList.remove("hidden");
+    };
+    tr.addEventListener("click", openMD);
+    tr.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openMD(); } });
     mdBody.appendChild(tr);
-  });
-
-  const adBody = document.querySelector("#adTable tbody");
-  adBody.innerHTML = "";
-  dasha.antardasha.forEach(x => {
-    const tr = document.createElement("tr");
-    [x.mahadasha, x.antardasha, shortDate(x.start), shortDate(x.end), x.duration, x.duration_days].forEach(v => { const td=document.createElement("td"); td.textContent=v; tr.appendChild(td); });
-    adBody.appendChild(tr);
-  });
-
-  const pdBody = document.querySelector("#pdTable tbody");
-  pdBody.innerHTML = "";
-  dasha.pratyantardasha.forEach(x => {
-    const tr = document.createElement("tr");
-    [x.mahadasha, x.antardasha, x.pratyantardasha, shortDate(x.start), shortDate(x.end), x.duration, x.duration_days].forEach(v => { const td=document.createElement("td"); td.textContent=v; tr.appendChild(td); });
-    pdBody.appendChild(tr);
   });
 
   document.getElementById("dashaVerification").textContent = JSON.stringify({
